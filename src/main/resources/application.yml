@@ -6,6 +6,10 @@ spring:
     job:
       names: ${job.name:NONE}
 
+  jpa:
+    hibernate:
+      ddl-auto: update
+
 ---
 spring:
   datasource:
