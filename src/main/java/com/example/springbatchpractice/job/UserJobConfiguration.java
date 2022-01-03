@@ -16,6 +16,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.JpaItemWriter;
@@ -43,9 +44,11 @@ public class UserJobConfiguration {
   private static final int CHUNK_SIZE = 1000;
 
   @Bean
-  public Job userCreateJob() {
+  public Job userCreateJob() throws Exception {
     return jobBuilderFactory.get("userCreateJob")
         .start(userCreateStep(null))
+        .next(userMoneyIncreaseStep(null))
+        .incrementer(new RunIdIncrementer())
         .build();
   }
 
@@ -53,6 +56,7 @@ public class UserJobConfiguration {
   Job UserMoneyIncreaseJob() throws Exception {
     return jobBuilderFactory.get("userMoneyIncreaseJob")
         .start(userMoneyIncreaseStep(null))
+        .incrementer(new RunIdIncrementer())
         .build();
   }
 
@@ -60,6 +64,7 @@ public class UserJobConfiguration {
   Job userMoneyGambleJob() throws Exception {
     return jobBuilderFactory.get("userMoneyGambleJob")
         .start(userMoneyGambleStep(null))
+        .incrementer(new RunIdIncrementer())
         .build();
   }
 
