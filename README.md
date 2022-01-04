@@ -8,12 +8,17 @@ Spring Batch 연습
 
 ## Function
 
-1. UserCreateJob: jobParameters로 만들고 싶은 유저 숫자를 입력 그만큼 user를 만들어서 DB에 저장하는 작업
+1. UserCreateJob
+    1. 사용법: jobParameters로 만들고 싶은 유저 숫자를 입력
+    2. 기능: 그만큼 user를 만들어서 DB에 저장하는 작업
 
-2. UserMoneyIncreaseJob: jobParameters로 유저에게 지급하고 싶은 금액을 입력 모든 user의 money 값을 해당 금액만큼 증가시킴
+2. UserMoneyIncreaseJob
+    1. 사용법: jobParameters로 유저에게 지급하고 싶은 금액을 입력
+    2. 기능: 모든 user의 money 값을 해당 금액만큼 증가시킴
 
-3. UserMoneyRandomJob: jobParameters로 기준 금액을 입력 기준 금액보다 많은 돈을 보유한 user의 money 값을 현재 값의 0.5 ~ 2.0배
-   사이로 랜덤하게 변경하는 작업
+3. UserMoneyRandomJob
+    1. 사용법: jobParameters로 기준 금액을 입력
+    2. 기능 기준 금액보다 많은 돈을 보유한 user의 money 값을 현재 값의 0.5 ~ 2.0배 사이로 랜덤하게 변경하는 작업
 
 ## Usage
 

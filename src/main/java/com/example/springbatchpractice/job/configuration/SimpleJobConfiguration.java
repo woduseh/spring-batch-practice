@@ -1,5 +1,6 @@
-package com.example.springbatchpractice.job;
+package com.example.springbatchpractice.job.configuration;
 
+import com.example.springbatchpractice.listener.JobResultListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -23,6 +24,7 @@ public class SimpleJobConfiguration {
   @Bean
   public Job simpleJob() {
     return jobBuilderFactory.get("simpleJob")
+        .listener(new JobResultListener())
         .start(simpleStep1(null))
         .next(simpleStep2(null))
         .build();
