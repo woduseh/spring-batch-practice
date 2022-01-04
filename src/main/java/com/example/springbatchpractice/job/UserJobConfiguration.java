@@ -1,4 +1,4 @@
-package com.example.springbatchpractice.job.configuration;
+package com.example.springbatchpractice.job;
 
 import com.example.springbatchpractice.dao.UserRepository;
 import com.example.springbatchpractice.entity.User;

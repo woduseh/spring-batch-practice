@@ -1,4 +1,4 @@
-package com.example.springbatchpractice.job.configuration;
+package com.example.springbatchpractice.job;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

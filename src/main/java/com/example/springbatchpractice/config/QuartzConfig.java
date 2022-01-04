@@ -8,6 +8,7 @@ import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -22,11 +23,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-/*
- * https://howtodoinjava.com/spring-batch/batch-quartz-java-config-example/
- *
- * */
+// From https://howtodoinjava.com/spring-batch/batch-quartz-java-config-example/
 
+/**
+ * Run UserJob by Quarts Scheduler
+ *
+ * @author Hwang Jae Yeon
+ */
 @Configuration
 public class QuartzConfig {
 
@@ -44,47 +47,61 @@ public class QuartzConfig {
   }
 
   @Bean
-  public JobDetail jobOneDetail() {
-    //Set Job data map
+  public JobDetail simpleJobDetail() {
     JobDataMap jobDataMap = new JobDataMap();
     jobDataMap.put("jobName", "simpleJob");
     jobDataMap.put("requestDate", LocalDateTime.now().toString());
-    jobDataMap.put("jobLauncher", jobLauncher);
-    jobDataMap.put("jobLocator", jobLocator);
-
-    return JobBuilder.newJob(CustomQuartzJob.class)
-        .withIdentity("simpleJob")
-        .setJobData(jobDataMap)
-        .storeDurably()
-        .build();
+    return jobDetailMaker(jobDataMap, "simpleJob");
   }
 
   @Bean
-  public Trigger jobOneTrigger() {
+  public Trigger simpleJobTrigger() {
     CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder
         .cronSchedule("2/5 * * * * ?");
+    return triggerMaker(simpleJobDetail(), cronScheduleBuilder, "simpleJobTrigger");
+  }
 
-    SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder
+  @Bean
+  public JobDetail userCreateJobDetail() {
+    JobDataMap jobDataMap = new JobDataMap();
+    jobDataMap.put("jobName", "userCreateJob");
+    jobDataMap.put("user_size", 100);
+    jobDataMap.put("base_amount", -1);
+    jobDataMap.put("money", 1000000);
+    return jobDetailMaker(jobDataMap, "userCreateJob");
+  }
+
+  @Bean
+  public JobDetail userMoneyGambleJobDetail() {
+    JobDataMap jobDataMap = new JobDataMap();
+    jobDataMap.put("jobName", "userMoneyGambleJob");
+    jobDataMap.put("base_amount", 500000);
+    return jobDetailMaker(jobDataMap, "userMoneyGambleJob");
+  }
+
+  @Bean
+  public Trigger userCreateJobTrigger() {
+    SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder
         .simpleSchedule()
-        .withIntervalInSeconds(10)
-        .withRepeatCount(3);
+        .withIntervalInSeconds(1)
+        .withRepeatCount(1);
+    return triggerMaker(userCreateJobDetail(), simpleScheduleBuilder, "userCreateJobTrigger");
+  }
 
-    return TriggerBuilder
-        .newTrigger()
-        .forJob(jobOneDetail())
-        .withIdentity("jobOneTrigger")
-        .withSchedule(cronScheduleBuilder)
-        .build();
+  @Bean
+  public Trigger userMoneyGambleTrigger() {
+    CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder
+        .cronSchedule("0/30 * * 1/1 * ? *");
+    return triggerMaker(userMoneyGambleJobDetail(), cronScheduleBuilder,
+        "userMoneyGambleJobTrigger");
   }
 
   @Bean
   public SchedulerFactoryBean schedulerFactoryBean() throws IOException {
     SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
-//    scheduler.setTriggers(jobOneTrigger(), jobTwoTrigger());
-    scheduler.setTriggers(jobOneTrigger());
+    scheduler.setTriggers(userCreateJobTrigger(), userMoneyGambleTrigger());
     scheduler.setQuartzProperties(quartzProperties());
-//    scheduler.setJobDetails(jobOneDetail(), jobTwoDetail());
-    scheduler.setJobDetails(jobOneDetail());
+    scheduler.setJobDetails(userCreateJobDetail(), userMoneyGambleJobDetail());
     return scheduler;
   }
 
@@ -94,5 +111,26 @@ public class QuartzConfig {
     propertiesFactoryBean.setLocation(new ClassPathResource("/quartz.properties"));
     propertiesFactoryBean.afterPropertiesSet();
     return propertiesFactoryBean.getObject();
+  }
+
+  private JobDetail jobDetailMaker(JobDataMap jobDataMap, String jobName) {
+    jobDataMap.put("jobLauncher", jobLauncher);
+    jobDataMap.put("jobLocator", jobLocator);
+
+    return JobBuilder.newJob(CustomQuartzJob.class)
+        .withIdentity(jobName)
+        .setJobData(jobDataMap)
+        .storeDurably()
+        .build();
+  }
+
+  private Trigger triggerMaker(JobDetail jobDetail, ScheduleBuilder schedule,
+      String triggerName) {
+    return TriggerBuilder
+        .newTrigger()
+        .forJob(jobDetail)
+        .withIdentity(triggerName)
+        .withSchedule(schedule)
+        .build();
   }
 }

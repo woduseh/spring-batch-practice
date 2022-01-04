@@ -3,7 +3,6 @@ package com.example.springbatchpractice.job;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.example.springbatchpractice.config.TestBatchConfig;
-import com.example.springbatchpractice.job.configuration.CalculatorJobConfiguration;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
