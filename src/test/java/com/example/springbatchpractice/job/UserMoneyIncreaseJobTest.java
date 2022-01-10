@@ -21,17 +21,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * https://jojoldu.tistory.com/455?category=902551
- * <p>
- * 위 가이드를 참고하여 제작함
- *
- * @author JYHwang
+ * <pre>
+ * packageName      : com.example.springbatchpractice.job
+ * fileName         : UserMoneyIncreaseJobTest
+ * author           : JYHwang
+ * date             : 2022-01-10
+ * description      : UserMoneyIncreaseJob 기능 테스트
+ * </pre>
+ * ====================================================
+ * <pre>
+ * DATE                 AUTHOR                  NOTE
+ * -----------------------------------------------------
+ * 2022-01-10           JYHwang                 최초 생성
+ * </pre>
  */
 
 @ExtendWith(SpringExtension.class)
 @SpringBatchTest
-@SpringBootTest(classes = {TestBatchConfig.class, UserGambleJobConfiguration.class})
-public class UserGambleJobTest {
+@SpringBootTest(classes = {TestBatchConfig.class, UserMoneyIncreaseJobConfiguration.class})
+public class UserMoneyIncreaseJobTest {
 
   @Autowired
   private UserRepository userRepository;
@@ -46,8 +54,8 @@ public class UserGambleJobTest {
   }
 
   @Test
-  @DisplayName("Gamble Test")
-  public void gambleTest() throws Exception {
+  @DisplayName("Money Increase")
+  public void moneyIncreaseTest() throws Exception {
     // Given
     long money = 1000000;
     long base_amount = 500000;
@@ -56,6 +64,7 @@ public class UserGambleJobTest {
 
     JobParameters jobParameters = new JobParametersBuilder()
         .addLong("base_amount", base_amount)
+        .addLong("money", money)
         .toJobParameters();
 
     // When
@@ -65,6 +74,6 @@ public class UserGambleJobTest {
     assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
     List<User> userList = userRepository.findAll();
     assertThat(userList.size()).isEqualTo(1);
-    assertThat(userList.get(0).getMoney()).isBetween((long) (money * 0.5), money * 2);
+    assertThat(userList.get(0).getMoney()).isEqualTo(money + money);
   }
 }
