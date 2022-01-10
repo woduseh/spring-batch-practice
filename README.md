@@ -9,37 +9,34 @@ Spring Batch 연습
 ## Function
 
 1. UserCreateJob
-    1. 사용법: jobParameters로 만들고 싶은 유저 숫자를 입력
-    2. 기능: 그만큼 user를 만들어서 DB에 저장하는 작업
+    - 사용법: jobParameters로 만들고 싶은 유저 숫자를 입력
+    - 기능: 그만큼 user를 만들어서 DB에 저장하는 작업
 
 2. UserMoneyIncreaseJob
-    1. 사용법: jobParameters로 유저에게 지급하고 싶은 금액을 입력
-    2. 기능: 모든 user의 money 값을 해당 금액만큼 증가시킴
+    - 사용법: jobParameters로 유저에게 지급하고 싶은 금액을 입력
+    - 기능: 모든 user의 money 값을 해당 금액만큼 증가시킴
 
 3. UserMoneyRandomJob
-    1. 사용법: jobParameters로 기준 금액을 입력
-    2. 기능 기준 금액보다 많은 돈을 보유한 user의 money 값을 현재 값의 0.5 ~ 2.0배 사이로 랜덤하게 변경하는 작업
+    - 사용법: jobParameters로 기준 금액을 입력
+    - 기능 기준 금액보다 많은 돈을 보유한 user의 money 값을 현재 값의 0.5 ~ 2.0배 사이로 랜덤하게 변경하는 작업
 
 ## Usage
 
-Docker로 사용할 경우,
+갱신 예정
 
-1. Build : $ docker build -t batchdocker:test .
-2. Run : $ docker run -e 'job.name=userCreateJob user_size=100 money=10000' -d batchdocker:test
+~~Docker로 사용할 경우,~~
 
-위와 같은 식으로 사용할 수 있음
+~~1. Build : $ docker build -t batchdocker:test .~~
+~~2. Run : $ docker run -e 'job.name=userCreateJob user_size=100 money=10000' -d batchdocker:test~~
 
-(현재 Docker component로 DB를 추가하지 않아 userCreateJob은 H2로 실행되고 즉시 종료되기에 결과를 확인할 수 없음.)
+~~위와 같은 식으로 사용할 수 있음~~
 
-### TODO
+~~(현재 Docker component로 DB를 추가하지 않아 userCreateJob은 H2로 실행되고 즉시 종료되기에 결과를 확인할 수 없음.)~~
 
-실행 중 발생한 warning 2가지 해결
+## TODO
 
-1. JPA does not support custom isolation levels, so locks may not be taken when launching Jobs
-2. org.springframework.batch.item.ItemProcessor is an interface. The implementing class will not be
-   queried for annotation based listener configurations. If using @StepScope on a @Bean method, be
-   sure to return the implementing class so listener annotations can be used.
-
-셋 다 성공하면 Quartz를 추가해서 정해진 시간에 실행할 수 있도록
-
-Quartz도 성공하면 JobParameter를 runtime argument로 주는 대신 더 편하게 줄 수 있도록 (실제 TMS처럼)
+- User Entity에 삭제 예정일, 삭제일 Column을 추가
+- 현재 날짜와 삭제 예정일을 비교
+    - 삭제 예정일 7일, 3일, 1일 전이면 log로 경고 문구를 출력
+    - 삭제 예정일 당일일 경우 삭제일을 갱신
+- 추후 모든 다른 기능에서 삭제일 값이 존재하는 User를 사용하지 않음

@@ -1,4 +1,4 @@
-package com.example.springbatchpractice.job;
+package com.example.springbatchpractice.job.sample;
 
 import java.util.Random;
 import lombok.RequiredArgsConstructor;

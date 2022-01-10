@@ -3,7 +3,10 @@ package com.example.springbatchpractice.job;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.example.springbatchpractice.config.TestBatchConfig;
-import java.time.LocalDateTime;
+import com.example.springbatchpractice.dao.UserRepository;
+import com.example.springbatchpractice.entity.User;
+import java.util.List;
+import org.junit.After;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,34 +20,51 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith(SpringExtension.class) // JUnit 프레임워크에서 내장된 Runner 실행 시 SpringRunner.class라는 확장된 클래스를 실행
-@SpringBatchTest // JobLauncherTestUtils를 사용하기 위해 Spring Batch 4.1 버전에 새롭게 추가된 어노테이션
-@SpringBootTest(classes = {CalculatorJobConfiguration.class, TestBatchConfig.class})
-// 통합 테스트 실행시 사용할 Java 설정
-public class CalculatorJobTest {
+/**
+ * https://jojoldu.tistory.com/455?category=902551
+ * <p>
+ * 위 가이드를 참고하여 제작함
+ *
+ * @author JYHwang
+ */
 
-  // Batch Job을 테스트 환경에서 실행할 Utils 클래스
+@ExtendWith(SpringExtension.class)
+@SpringBatchTest
+@SpringBootTest(classes = {TestBatchConfig.class, UserGambleJobConfiguration.class})
+public class UserGambleJobTest {
+
+  @Autowired
+  private UserRepository userRepository;
+
   @Autowired
   private JobLauncherTestUtils jobLauncherTestUtils;
 
-  @Test
-  @DisplayName("계산기 테스트")
-  public void calculatorJobTest() throws Exception {
+  @After
+  public void tearDown() {
+    userRepository.deleteAllInBatch();
+    userRepository.deleteAllInBatch();
+  }
 
-    double num1 = 2.0;
-    double num2 = 3.4;
+  @Test
+  @DisplayName("도박 시행")
+  public void gambleTest() throws Exception {
+    // Given
+    long money = 1000000;
+    long base_amount = 500000;
+
+    userRepository.save(new User("황재연", money));
 
     JobParameters jobParameters = new JobParametersBuilder()
-        .addString("version", LocalDateTime.now().toString())
-        .addDouble("value1", num1)
-        .addDouble("value2", num2)
+        .addLong("base_amount", base_amount)
         .toJobParameters();
 
+    // When
     JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
-    // JobParameter와 함께 Job을 실행
-    // 해당 Job의 결과는 JobExecution에 담겨 반환
+    // Then
     assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-    // 성공적으로 배치가 수행되었는지 검증
+    List<User> userList = userRepository.findAll();
+    assertThat(userList.size()).isEqualTo(1);
+    assertThat(userList.get(0).getMoney()).isBetween((long) (money * 0.5), money * 2);
   }
 }

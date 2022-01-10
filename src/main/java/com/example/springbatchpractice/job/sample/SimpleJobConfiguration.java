@@ -1,4 +1,4 @@
-package com.example.springbatchpractice.job;
+package com.example.springbatchpractice.job.sample;
 
 import com.example.springbatchpractice.listener.JobResultListener;
 import lombok.RequiredArgsConstructor;

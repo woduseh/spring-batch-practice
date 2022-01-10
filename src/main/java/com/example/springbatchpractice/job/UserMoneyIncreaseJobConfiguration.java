@@ -1,10 +1,8 @@
 package com.example.springbatchpractice.job;
 
-import com.example.springbatchpractice.dao.UserRepository;
 import com.example.springbatchpractice.entity.User;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
@@ -24,7 +22,6 @@ import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,24 +30,14 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 @Slf4j
 @RequiredArgsConstructor
 @Configuration
-public class UserJobConfiguration {
+public class UserMoneyIncreaseJobConfiguration {
 
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;
   private final EntityManagerFactory entityManagerFactory;
   private final DataSource dataSource;
-  private final UserRepository userRepository;
 
   private static final int CHUNK_SIZE = 1000;
-
-  @Bean
-  public Job userCreateJob() throws Exception {
-    return jobBuilderFactory.get("userCreateJob")
-        .start(userCreateStep(null))
-        .next(userMoneyIncreaseStep(null))
-        .incrementer(new RunIdIncrementer())
-        .build();
-  }
 
   @Bean
   Job UserMoneyIncreaseJob() throws Exception {
@@ -58,33 +45,6 @@ public class UserJobConfiguration {
         .start(userMoneyIncreaseStep(null))
         .incrementer(new RunIdIncrementer())
         .build();
-  }
-
-  @Bean
-  Job userMoneyGambleJob() throws Exception {
-    return jobBuilderFactory.get("userMoneyGambleJob")
-        .start(userMoneyGambleStep(null))
-        .incrementer(new RunIdIncrementer())
-        .build();
-  }
-
-  @Bean
-  @JobScope
-  public Step userCreateStep(@Value("#{jobParameters[user_size]}") Integer user_size) {
-    return stepBuilderFactory.get("userCreateStep")
-        .tasklet((contribution, chunkContext) -> {
-          log.info(">>>>> userCreateStep");
-
-          for (int i = 1; i <= user_size; i++) {
-            String name = nameMaker(new Random().nextInt(7));
-            Long money = 0L;
-            User user = new User(name, money);
-            log.info(">>>>> {}st user is {}", i, user.getName());
-            userRepository.save(user);
-          }
-
-          return RepeatStatus.FINISHED;
-        }).build();
   }
 
   @Bean
@@ -97,20 +57,6 @@ public class UserJobConfiguration {
         .<User, User>chunk(CHUNK_SIZE)
         .reader(userInfoReader(null))
         .processor(increaseUserMoneyProcessor(money))
-        .writer(userInfoWriter())
-        .build();
-  }
-
-  @Bean
-  @JobScope
-  @Transactional
-  public Step userMoneyGambleStep(@Value("#{jobParameters[base_amount]}") Integer base_amount)
-      throws Exception {
-    log.info(">>>>> userMoneyGambleStep");
-    return stepBuilderFactory.get("userMoneyGambleStep")
-        .<User, User>chunk(CHUNK_SIZE)
-        .reader(userInfoReader(null))
-        .processor(gambleUserMoneyProcessor(base_amount))
         .writer(userInfoWriter())
         .build();
   }
@@ -164,35 +110,11 @@ public class UserJobConfiguration {
   }
 
   @Bean
-  @StepScope
-  public ItemProcessor<User, User> gambleUserMoneyProcessor(
-      @Value("#{jobParameters[base_amount]}") Integer base_amount) {
-    log.info(">>>>> gambleUserMoneyProcessor working");
-    return user -> {
-      User gamble_user = new User(user.getId(), user.getName(), user.getMoney());
-      if (user.getMoney() >= base_amount) {
-        gamble_user.setMoney(gambleMoney(gamble_user.getMoney()));
-      }
-      return gamble_user;
-    };
-  }
-
-  @Bean
   public JpaItemWriter<User> userInfoWriter() {
     log.info(">>>>> userInfoWriter working");
     JpaItemWriter<User> jpaItemWriter = new JpaItemWriter<>();
     jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
 
     return jpaItemWriter;
-  }
-
-  private String nameMaker(int index) {
-    String[] nameArray = {"김철수", "나은지", "이수지", "홍길동", "임꺽정", "이도", "황재연"};
-
-    return index < nameArray.length ? nameArray[index] : "이름 없음";
-  }
-
-  private Long gambleMoney(Long money) {
-    return (long) (money * ((Math.random() * 1.5) + 0.5));
   }
 }
