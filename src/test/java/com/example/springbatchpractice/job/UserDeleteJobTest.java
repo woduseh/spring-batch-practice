@@ -6,13 +6,16 @@ import com.example.springbatchpractice.config.TestBatchConfig;
 import com.example.springbatchpractice.dao.UserRepository;
 import com.example.springbatchpractice.entity.User;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,23 +49,26 @@ public class UserDeleteJobTest {
   @Autowired
   private JobLauncherTestUtils jobLauncherTestUtils;
 
-  @After
+  @AfterEach
   public void tearDown() {
-    userRepository.deleteAllInBatch();
     userRepository.deleteAllInBatch();
   }
 
   @Test
   @DisplayName("Delete_Date Update Test")
   public void deleteTest() throws Exception {
+    // given
     long money = 1000000;
-    long base_amount = 500000;
     LocalDate deleteRes = LocalDate.now();
 
     userRepository.save(new User("황재연", money, deleteRes, null));
 
+    JobParameters jobParameters = new JobParametersBuilder()
+        .addString("unique Parameter", LocalDateTime.now().toString())
+        .toJobParameters();
+
     // When
-    JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+    JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
     // Then
     assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);

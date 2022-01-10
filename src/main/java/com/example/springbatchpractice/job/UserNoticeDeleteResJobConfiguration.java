@@ -1,6 +1,7 @@
 package com.example.springbatchpractice.job;
 
 import com.example.springbatchpractice.entity.User;
+import com.example.springbatchpractice.util.CreateDateJobParameter;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashMap;
@@ -24,7 +25,6 @@ import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -54,13 +54,20 @@ public class UserNoticeDeleteResJobConfiguration {
   private final StepBuilderFactory stepBuilderFactory;
   private final EntityManagerFactory entityManagerFactory;
   private final DataSource dataSource;
+  private final CreateDateJobParameter jobParameter;
 
   private static final int CHUNK_SIZE = 1000;
 
   @Bean
+  @JobScope
+  public CreateDateJobParameter jobParameter() {
+    return new CreateDateJobParameter();
+  }
+
+  @Bean
   Job UserNoticeDeleteResJob() throws Exception {
     return jobBuilderFactory.get("userNoticeDeleteResJob")
-        .start(userNoticeDeleteResStep(null))
+        .start(userNoticeDeleteResStep())
         .incrementer(new RunIdIncrementer())
         .build();
   }
@@ -68,12 +75,12 @@ public class UserNoticeDeleteResJobConfiguration {
   @Bean
   @JobScope
   @Transactional
-  public Step userNoticeDeleteResStep(@Value("#{jobParameters[delete_res]}") LocalDate deleteRes)
+  public Step userNoticeDeleteResStep()
       throws Exception {
-    log.info(">>>>> userMoneyIncreaseStep");
-    return stepBuilderFactory.get("userMoneyIncreaseStep")
+    log.info(">>>>> userNoticeDeleteResStep");
+    return stepBuilderFactory.get("userNoticeDeleteResStep")
         .<User, User>chunk(CHUNK_SIZE)
-        .reader(userInfoReader(null))
+        .reader(userInfoReader())
         .processor(userNoticeDeleteResProcessor())
         .writer(userInfoWriter())
         .build();
@@ -81,13 +88,14 @@ public class UserNoticeDeleteResJobConfiguration {
 
   @Bean
   @StepScope
-  public JdbcPagingItemReader<User> userInfoReader(
-      @Value("#{jobParameters[deleteRes]}") LocalDate deleteRes
-  ) throws Exception {
+  public JdbcPagingItemReader<User> userInfoReader() throws Exception {
     log.info(">>>>> userInfoReader working");
 
     Map<String, Object> parameterValues = new HashMap<>();
-    parameterValues.put("deleteRes", deleteRes);
+    parameterValues.put("deleteRes", jobParameter.getDeleteRes());
+
+    Period period = Period.between(LocalDate.now(), jobParameter.getDeleteRes());
+    parameterValues.put("diffBetweenDays", period.getDays());
 
     return new JdbcPagingItemReaderBuilder<User>()
         .pageSize(CHUNK_SIZE)
@@ -107,7 +115,7 @@ public class UserNoticeDeleteResJobConfiguration {
     queryProvider.setSelectClause("*");
     queryProvider.setFromClause("from user");
     queryProvider.setWhereClause(
-        "where delete_date is null and DATEDIFF(now(), delete_res) <= deleteRes");
+        "where delete_date is null and DATEDIFF(:deleteRes, now()) <= :diffBetweenDays");
 
     Map<String, Order> sortKeys = new HashMap<>(1);
     sortKeys.put("id", Order.ASCENDING);
@@ -122,7 +130,7 @@ public class UserNoticeDeleteResJobConfiguration {
   public ItemProcessor<User, User> userNoticeDeleteResProcessor() {
     log.info(">>>>> userNoticeDeleteResProcessor working");
     return user -> {
-      Period period = Period.between(user.getDeleteRes(), LocalDate.now());
+      Period period = Period.between(LocalDate.now(), user.getDeleteRes());
       log.info("{} 님. 앞으로 {}일 간 접속하지 않으면 계정이 삭제됩니다.", user.getName(), period.getDays());
       return null;
     };

@@ -7,8 +7,9 @@ import com.example.springbatchpractice.dao.UserRepository;
 import com.example.springbatchpractice.entity.User;
 import com.example.springbatchpractice.util.DateUtil;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,9 +42,8 @@ public class UserGambleJobTest {
   @Autowired
   private JobLauncherTestUtils jobLauncherTestUtils;
 
-  @After
+  @AfterEach
   public void tearDown() {
-    userRepository.deleteAllInBatch();
     userRepository.deleteAllInBatch();
   }
 
@@ -59,6 +59,7 @@ public class UserGambleJobTest {
 
     JobParameters jobParameters = new JobParametersBuilder()
         .addLong("base_amount", base_amount)
+        .addString("unique Parameter", LocalDateTime.now().toString())
         .toJobParameters();
 
     // When

@@ -105,7 +105,7 @@ public class UserMoneyIncreaseJobConfiguration {
     return user -> {
       User rich_user = new User(user.getId(), user.getName(), user.getMoney(), user.getDeleteRes(),
           user.getDeleteRes());
-      rich_user.setMoney(rich_user.getMoney() + money);
+      rich_user.updateMoney(rich_user.getMoney() + money);
       return rich_user;
     };
   }
