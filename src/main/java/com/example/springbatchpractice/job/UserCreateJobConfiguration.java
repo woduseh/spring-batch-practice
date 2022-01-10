@@ -37,13 +37,13 @@ public class UserCreateJobConfiguration {
 
   @Bean
   @JobScope
-  public Step userCreateStep(@Value("#{jobParameters[user_size]}") Integer user_size,
+  public Step userCreateStep(@Value("#{jobParameters[user_size]}") Long user_size,
       @Value("#{jobParameters[base_money]}") Long base_money) {
     return stepBuilderFactory.get("userCreateStep")
         .tasklet((contribution, chunkContext) -> {
           log.info(">>>>> userCreateStep");
 
-          for (int i = 1; i <= user_size; i++) {
+          for (Long i = 1L; i <= user_size; i++) {
             String name = nameMaker(new Random().nextInt(7));
             LocalDate deleteRes = DateUtil.randomTimeMaker();
             User user = new User(name, base_money, deleteRes, null);

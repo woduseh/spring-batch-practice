@@ -5,8 +5,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import com.example.springbatchpractice.config.TestBatchConfig;
 import com.example.springbatchpractice.dao.UserRepository;
 import com.example.springbatchpractice.entity.User;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,10 +24,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 /**
  * <pre>
  * packageName      : com.example.springbatchpractice.job
- * fileName         : UserNoticeDeleteResJobTest
+ * fileName         : UserCreateJobTest
  * author           : JYHwang
  * date             : 2022-01-10
- * description      : UserNoticeDeleteResJob의 작동 확인을 위한 테스트 코드
+ * description      : UserCreateJob의 작동 확인을 위한 테스트 코드
  * </pre>
  * ===========================================================
  * <pre>
@@ -39,8 +39,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @SpringBatchTest
-@SpringBootTest(classes = {TestBatchConfig.class, UserNoticeDeleteResJobConfiguration.class})
-public class UserNoticeDeleteResJobTest {
+@SpringBootTest(classes = {TestBatchConfig.class, UserCreateJobConfiguration.class})
+public class UserCreateJobTest {
 
   @Autowired
   private UserRepository userRepository;
@@ -53,29 +53,26 @@ public class UserNoticeDeleteResJobTest {
     userRepository.deleteAllInBatch();
   }
 
-  /**
-   * application.yml의 profile.active 옵션이 local이면 실패함 (sql 문법이 mysql에 맞추어진 까닭에 옵션을 mysql로 변경하면 성공)
-   *
-   * @throws Exception
-   */
   @Test
-  @DisplayName("Notice Delete_Res")
-  public void UserNoticeDeleteResTest() throws Exception {
+  @DisplayName("User Create Test")
+  public void createTest() throws Exception {
     // given
-    long money = 1000000;
-    LocalDate deleteRes = LocalDate.of(2022, 1, 13);
-
-    userRepository.save(new User("황재연", money, deleteRes, null));
+    Long userSize = 1L;
+    Long baseMoney = 1000000L;
 
     JobParameters jobParameters = new JobParametersBuilder()
-        .addDate("deleteRes", java.sql.Date.valueOf(LocalDate.of(2022, 1, 13)))
+        .addLong("user_size", userSize)
+        .addLong("base_money", baseMoney)
         .addString("unique Parameter", LocalDateTime.now().toString())
         .toJobParameters();
 
-    // when
+    // When
     JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
-    // then
+    // Then
     assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
+    List<User> userList = userRepository.findAll();
+    assertThat(userList.size()).isEqualTo(1);
+    assertThat(userList.get(0).getMoney()).isEqualTo(baseMoney);
   }
 }

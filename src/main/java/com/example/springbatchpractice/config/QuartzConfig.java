@@ -8,7 +8,6 @@ import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -58,7 +57,13 @@ public class QuartzConfig {
   public Trigger simpleJobTrigger() {
     CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder
         .cronSchedule("2/5 * * * * ?");
-    return triggerMaker(simpleJobDetail(), cronScheduleBuilder, "simpleJobTrigger");
+
+    return TriggerBuilder
+        .newTrigger()
+        .forJob(simpleJobDetail())
+        .withIdentity("simpleJobTrigger")
+        .withSchedule(cronScheduleBuilder)
+        .build();
   }
 
   @Bean
@@ -85,15 +90,24 @@ public class QuartzConfig {
         .simpleSchedule()
         .withIntervalInSeconds(1)
         .withRepeatCount(1);
-    return triggerMaker(userCreateJobDetail(), simpleScheduleBuilder, "userCreateJobTrigger");
+    return TriggerBuilder
+        .newTrigger()
+        .forJob(userCreateJobDetail())
+        .withIdentity("userCreateJobTrigger")
+        .withSchedule(simpleScheduleBuilder)
+        .build();
   }
 
   @Bean
   public Trigger userMoneyGambleTrigger() {
     CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder
         .cronSchedule("0/30 * * 1/1 * ? *");
-    return triggerMaker(userMoneyGambleJobDetail(), cronScheduleBuilder,
-        "userMoneyGambleJobTrigger");
+    return TriggerBuilder
+        .newTrigger()
+        .forJob(userMoneyGambleJobDetail())
+        .withIdentity("userMoneyGambleJobTrigger")
+        .withSchedule(cronScheduleBuilder)
+        .build();
   }
 
   @Bean
@@ -121,16 +135,6 @@ public class QuartzConfig {
         .withIdentity(jobName)
         .setJobData(jobDataMap)
         .storeDurably()
-        .build();
-  }
-
-  private Trigger triggerMaker(JobDetail jobDetail, ScheduleBuilder schedule,
-      String triggerName) {
-    return TriggerBuilder
-        .newTrigger()
-        .forJob(jobDetail)
-        .withIdentity(triggerName)
-        .withSchedule(schedule)
         .build();
   }
 }
