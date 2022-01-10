@@ -5,6 +5,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import com.example.springbatchpractice.config.TestBatchConfig;
 import com.example.springbatchpractice.dao.UserRepository;
 import com.example.springbatchpractice.entity.User;
+import com.example.springbatchpractice.util.DateUtil;
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.After;
 import org.junit.jupiter.api.DisplayName;
@@ -59,8 +61,9 @@ public class UserMoneyIncreaseJobTest {
     // Given
     long money = 1000000;
     long base_amount = 500000;
+    LocalDate deleteRes = DateUtil.randomTimeMaker();
 
-    userRepository.save(new User("황재연", money));
+    userRepository.save(new User("황재연", money, deleteRes, null));
 
     JobParameters jobParameters = new JobParametersBuilder()
         .addLong("base_amount", base_amount)

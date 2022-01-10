@@ -1,5 +1,6 @@
 package com.example.springbatchpractice.entity;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,29 +24,43 @@ public class User {
   @Id
   @Column(name = "id", nullable = false)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long Id;
+  private Long id;
 
   @Column(name = "name")
-  private String Name;
+  private String name;
 
   @Column(name = "money")
-  private Long Money;
+  private Long money;
+
+  @Column(name = "delete_date")
+  private LocalDate deleteDate;
+
+  @Column(name = "delete_res")
+  private LocalDate deleteRes;
 
   @Builder
-  public User(Long Id, String Name, Long Money) {
-    this.Id = Id;
-    this.Name = Name;
-    this.Money = Money;
+  public User(Long Id, String Name, Long Money, LocalDate deleteDate, LocalDate deleteRes) {
+    this.id = Id;
+    this.name = Name;
+    this.money = Money;
+    this.deleteRes = deleteRes;
+    this.deleteDate = deleteDate;
   }
 
   @Builder
-  public User(String Name, Long Money) {
-    this.Name = Name;
-    this.Money = Money;
+  public User(String Name, Long Money, LocalDate deleteRes, LocalDate deleteDate) {
+    this.name = Name;
+    this.money = Money;
+    this.deleteRes = deleteRes;
+    this.deleteDate = deleteDate;
   }
 
   public void updateMoney(Long Money) {
-    this.Money = Money;
+    this.money = Money;
+  }
+
+  public void deleteUser() {
+    this.deleteDate = LocalDate.now();
   }
 
   @Override
@@ -57,7 +72,7 @@ public class User {
       return false;
     }
     User user = (User) o;
-    return Id != null && Objects.equals(Id, user.Id);
+    return id != null && Objects.equals(id, user.id);
   }
 
   @Override

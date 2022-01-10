@@ -87,7 +87,7 @@ public class UserMoneyIncreaseJobConfiguration {
     queryProvider.setDataSource(dataSource); // Database에 맞는 PagingQueryProvider를 선택하기 위해
     queryProvider.setSelectClause("*");
     queryProvider.setFromClause("from user");
-    queryProvider.setWhereClause("where money >= :base_amount");
+    queryProvider.setWhereClause("where money >= :base_amount and delete_date is null");
 
     Map<String, Order> sortKeys = new HashMap<>(1);
     sortKeys.put("id", Order.ASCENDING);
@@ -103,7 +103,8 @@ public class UserMoneyIncreaseJobConfiguration {
       @Value("#{jobParameters[money]}") Integer money) {
     log.info(">>>>> increaseUserMoneyProcessor working");
     return user -> {
-      User rich_user = new User(user.getId(), user.getName(), user.getMoney());
+      User rich_user = new User(user.getId(), user.getName(), user.getMoney(), user.getDeleteRes(),
+          user.getDeleteRes());
       rich_user.setMoney(rich_user.getMoney() + money);
       return rich_user;
     };
