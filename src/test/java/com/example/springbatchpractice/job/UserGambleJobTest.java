@@ -55,7 +55,7 @@ public class UserGambleJobTest {
     long base_amount = 500000;
     LocalDate deleteRes = DateUtil.randomTimeMaker();
 
-    userRepository.save(new User("황재연", money, deleteRes, null));
+    userRepository.save(new User("황재연", money, deleteRes));
 
     JobParameters jobParameters = new JobParametersBuilder()
         .addLong("base_amount", base_amount)

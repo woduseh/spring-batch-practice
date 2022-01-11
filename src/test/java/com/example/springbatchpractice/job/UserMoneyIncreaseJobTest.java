@@ -41,7 +41,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @SpringBatchTest
-@SpringBootTest(classes = {TestBatchConfig.class, UserMoneyIncreaseJobConfiguration.class})
+@SpringBootTest(classes = {TestBatchConfig.class, UserIncreaseMoneyJobConfiguration.class})
 public class UserMoneyIncreaseJobTest {
 
   @Autowired
@@ -63,7 +63,7 @@ public class UserMoneyIncreaseJobTest {
     long base_amount = 500000;
     LocalDate deleteRes = DateUtil.randomTimeMaker();
 
-    userRepository.save(new User("황재연", money, deleteRes, null));
+    userRepository.save(new User("황재연", money, deleteRes));
 
     JobParameters jobParameters = new JobParametersBuilder()
         .addLong("base_amount", base_amount)

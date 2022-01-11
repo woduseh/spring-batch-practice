@@ -18,6 +18,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * <pre>
+ * packageName      : com.example.springbatchpractice.job
+ * fileName         : UserCreateJobConfiguration
+ * author           : JYHwang
+ * date             : 2022-01-10
+ * description      : 입력한 숫자만큼 user를 생성하는 기능
+ * </pre>
+ * ===========================================================
+ * <pre>
+ * DATE                 AUTHOR                  NOTE
+ * -----------------------------------------------------
+ * 2022-01-10           JYHwang                 최초 생성
+ * </pre>
+ */
+
 @Slf4j
 @RequiredArgsConstructor
 @Configuration
@@ -46,7 +62,7 @@ public class UserCreateJobConfiguration {
           for (Long i = 1L; i <= user_size; i++) {
             String name = nameMaker(new Random().nextInt(7));
             LocalDate deleteRes = DateUtil.randomTimeMaker();
-            User user = new User(name, base_money, deleteRes, null);
+            User user = new User(name, base_money, deleteRes);
             log.info(">>>>> {}st user is {}", i, user.getName());
             userRepository.save(user);
           }

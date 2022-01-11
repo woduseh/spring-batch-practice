@@ -26,6 +26,24 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.util.ObjectUtils;
+
+/**
+ * <pre>
+ * packageName      : com.example.springbatchpractice.job
+ * fileName         : UserGambleJobConfiguration
+ * author           : JYHwang
+ * date             : 2022-01-10
+ * description      : 입력한 기준 금액 이상 금액을 보유한 user를 선택하여 보유 금액을 0.5~2배 사이에서 랜덤하게 변경하는 기능
+ * </pre>
+ * ===========================================================
+ * <pre>
+ * DATE                 AUTHOR                  NOTE
+ * -----------------------------------------------------
+ * 2022-01-10           JYHwang                 최초 생성
+ * 2022-01-11           JYHwang                 불필요한 코드 개선
+ * </pre>
+ */
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,9 +58,9 @@ public class UserGambleJobConfiguration {
   private static final int CHUNK_SIZE = 1000;
 
   @Bean
-  Job userMoneyGambleJob() throws Exception {
-    return jobBuilderFactory.get("userMoneyGambleJob")
-        .start(userMoneyGambleStep(null))
+  Job userGambleJob() throws Exception {
+    return jobBuilderFactory.get("userGambleJob")
+        .start(userGambleStep())
         .incrementer(new RunIdIncrementer())
         .build();
   }
@@ -50,22 +68,22 @@ public class UserGambleJobConfiguration {
   @Bean
   @JobScope
   @Transactional
-  public Step userMoneyGambleStep(@Value("#{jobParameters[base_amount]}") Integer base_amount)
+  public Step userGambleStep()
       throws Exception {
-    log.info(">>>>> userMoneyGambleStep");
-    return stepBuilderFactory.get("userMoneyGambleStep")
+    log.info(">>>>> userGambleStep");
+    return stepBuilderFactory.get("userGambleStep")
         .<User, User>chunk(CHUNK_SIZE)
-        .reader(userInfoReader(null))
-        .processor(gambleUserMoneyProcessor(base_amount))
-        .writer(userInfoWriter())
+        .reader(userGambleInfoReader(null))
+        .processor(userGambleProcessor())
+        .writer(userGambleWriter())
         .build();
   }
 
   @Bean
   @StepScope
-  public JdbcPagingItemReader<User> userInfoReader(
-      @Value("#{jobParameters[base_amount]}") Integer base_amount) throws Exception {
-    log.info(">>>>> userInfoReader working");
+  public JdbcPagingItemReader<User> userGambleInfoReader(
+      @Value("#{jobParameters[base_amount]}") Long base_amount) throws Exception {
+    log.info(">>>>> userGambleInfoReader working");
 
     Map<String, Object> parameterValues = new HashMap<>();
     parameterValues.put("base_amount", base_amount);
@@ -75,19 +93,19 @@ public class UserGambleJobConfiguration {
         .fetchSize(CHUNK_SIZE)
         .dataSource(dataSource)
         .rowMapper(new BeanPropertyRowMapper<>(User.class))
-        .queryProvider(createQueryProvider())
+        .queryProvider(selectUserGambleQueryProvider())
         .parameterValues(parameterValues)
-        .name("userInfoReader")
+        .name("userGambleInfoReader")
         .build();
   }
 
   @Bean
-  public PagingQueryProvider createQueryProvider() throws Exception {
+  public PagingQueryProvider selectUserGambleQueryProvider() throws Exception {
     SqlPagingQueryProviderFactoryBean queryProvider = new SqlPagingQueryProviderFactoryBean();
     queryProvider.setDataSource(dataSource); // Database에 맞는 PagingQueryProvider를 선택하기 위해
     queryProvider.setSelectClause("*");
     queryProvider.setFromClause("from user");
-    queryProvider.setWhereClause("where money >= :base_amount and delete_date is null");
+    queryProvider.setWhereClause("where money >= :base_amount");
 
     Map<String, Order> sortKeys = new HashMap<>(1);
     sortKeys.put("id", Order.ASCENDING);
@@ -99,22 +117,20 @@ public class UserGambleJobConfiguration {
 
   @Bean
   @StepScope
-  public ItemProcessor<User, User> gambleUserMoneyProcessor(
-      @Value("#{jobParameters[base_amount]}") Integer base_amount) {
-    log.info(">>>>> gambleUserMoneyProcessor working");
+  public ItemProcessor<User, User> userGambleProcessor() {
+    log.info(">>>>> userGambleProcessor working");
     return user -> {
-      User gamble_user = new User(user.getId(), user.getName(), user.getMoney(),
-          user.getDeleteRes(), user.getDeleteRes());
-      if (user.getMoney() >= base_amount) {
-        gamble_user.setMoney(gambleMoney(gamble_user.getMoney()));
+      if (ObjectUtils.isEmpty(user.getDeleteDate())) {
+        user.updateMoney(gambleMoney(user.getMoney()));
+        return user;
       }
-      return gamble_user;
+      return null;
     };
   }
 
   @Bean
-  public JpaItemWriter<User> userInfoWriter() {
-    log.info(">>>>> userInfoWriter working");
+  public JpaItemWriter<User> userGambleWriter() {
+    log.info(">>>>> userGambleWriter working");
     JpaItemWriter<User> jpaItemWriter = new JpaItemWriter<>();
     jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
 

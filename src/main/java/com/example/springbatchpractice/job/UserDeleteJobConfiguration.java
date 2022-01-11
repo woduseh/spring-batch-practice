@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
  * fileName         : UserDeleteJobConfiguration
  * author           : JYHwang
  * date             : 2022-01-10
- * description      :
+ * description      : 삭제 예정일이 당일인 user를 논리적으로 삭제하는 기능
  * </pre>
  * ===========================================================
  * <pre>
@@ -42,7 +42,7 @@ public class UserDeleteJobConfiguration {
   private final UserRepository userRepository;
 
   @Bean
-  Job userMoneyGambleJob() {
+  Job userDeleteJob() {
     return jobBuilderFactory.get("userDeleteJob")
         .start(userDeleteStep())
         .incrementer(new RunIdIncrementer())
@@ -56,7 +56,7 @@ public class UserDeleteJobConfiguration {
         .tasklet((contribution, chunkContext) -> {
           log.info(">>>>> userDeleteStep");
           List<User> userList = userRepository.findAllByDeleteRes(LocalDate.now());
-          
+
           for (User user : userList) {
             user.deleteUser();
           }

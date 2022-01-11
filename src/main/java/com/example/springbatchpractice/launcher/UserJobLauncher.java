@@ -1,4 +1,4 @@
-package com.example.springbatchpractice.quartz;
+package com.example.springbatchpractice.launcher;
 
 import java.util.Date;
 import java.util.Map;
@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -18,14 +17,14 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 @Getter
 @Setter
 @Slf4j
-public class CustomQuartzJob extends QuartzJobBean {
+public class UserJobLauncher extends QuartzJobBean {
 
   private String jobName;
   private JobLauncher jobLauncher;
   private JobLocator jobLocator;
 
   @Override
-  protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+  protected void executeInternal(JobExecutionContext context) {
 
     Map<String, Object> jobDataMap = context.getMergedJobDataMap();
 

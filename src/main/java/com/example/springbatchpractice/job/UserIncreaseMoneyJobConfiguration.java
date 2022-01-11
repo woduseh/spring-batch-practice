@@ -26,11 +26,29 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.util.ObjectUtils;
+
+/**
+ * <pre>
+ * packageName      : com.example.springbatchpractice.job
+ * fileName         : UserIncreaseMoneyJobConfiguration
+ * author           : JYHwang
+ * date             : 2022-01-10
+ * description      : 모든 user의 보유 money를 입력한 값만큼 증가시키는 기능
+ * </pre>
+ * ===========================================================
+ * <pre>
+ * DATE                 AUTHOR                  NOTE
+ * -----------------------------------------------------
+ * 2022-01-10           JYHwang                 최초 생성
+ * 2022-01-11           JYHwang                 불필요한 코드 개선
+ * </pre>
+ */
 
 @Slf4j
 @RequiredArgsConstructor
 @Configuration
-public class UserMoneyIncreaseJobConfiguration {
+public class UserIncreaseMoneyJobConfiguration {
 
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;
@@ -40,9 +58,9 @@ public class UserMoneyIncreaseJobConfiguration {
   private static final int CHUNK_SIZE = 1000;
 
   @Bean
-  Job UserMoneyIncreaseJob() throws Exception {
-    return jobBuilderFactory.get("userMoneyIncreaseJob")
-        .start(userMoneyIncreaseStep(null))
+  Job UserIncreaseMoneyJob() throws Exception {
+    return jobBuilderFactory.get("userIncreaseMoneyJob")
+        .start(userIncreaseMoneyStep())
         .incrementer(new RunIdIncrementer())
         .build();
   }
@@ -50,44 +68,38 @@ public class UserMoneyIncreaseJobConfiguration {
   @Bean
   @JobScope
   @Transactional
-  public Step userMoneyIncreaseStep(@Value("#{jobParameters[money]}") Integer money)
+  public Step userIncreaseMoneyStep()
       throws Exception {
-    log.info(">>>>> userMoneyIncreaseStep");
-    return stepBuilderFactory.get("userMoneyIncreaseStep")
+    log.info(">>>>> userIncreaseMoneyStep");
+    return stepBuilderFactory.get("userIncreaseMoneyStep")
         .<User, User>chunk(CHUNK_SIZE)
-        .reader(userInfoReader(null))
-        .processor(increaseUserMoneyProcessor(money))
-        .writer(userInfoWriter())
+        .reader(userIncreaseMoneyInfoReader())
+        .processor(userIncreaseMoneyProcessor(null))
+        .writer(userIncreaseMoneyWriter())
         .build();
   }
 
   @Bean
   @StepScope
-  public JdbcPagingItemReader<User> userInfoReader(
-      @Value("#{jobParameters[base_amount]}") Integer base_amount) throws Exception {
-    log.info(">>>>> userInfoReader working");
-
-    Map<String, Object> parameterValues = new HashMap<>();
-    parameterValues.put("base_amount", base_amount);
+  public JdbcPagingItemReader<User> userIncreaseMoneyInfoReader() throws Exception {
+    log.info(">>>>> userIncreaseMoneyInfoReader working");
 
     return new JdbcPagingItemReaderBuilder<User>()
         .pageSize(CHUNK_SIZE)
         .fetchSize(CHUNK_SIZE)
         .dataSource(dataSource)
         .rowMapper(new BeanPropertyRowMapper<>(User.class))
-        .queryProvider(createQueryProvider())
-        .parameterValues(parameterValues)
-        .name("userInfoReader")
+        .queryProvider(selectUserIncreaseMoneyQueryProvider())
+        .name("userIncreaseMoneyInfoReader")
         .build();
   }
 
   @Bean
-  public PagingQueryProvider createQueryProvider() throws Exception {
+  public PagingQueryProvider selectUserIncreaseMoneyQueryProvider() throws Exception {
     SqlPagingQueryProviderFactoryBean queryProvider = new SqlPagingQueryProviderFactoryBean();
     queryProvider.setDataSource(dataSource); // Database에 맞는 PagingQueryProvider를 선택하기 위해
     queryProvider.setSelectClause("*");
     queryProvider.setFromClause("from user");
-    queryProvider.setWhereClause("where money >= :base_amount and delete_date is null");
 
     Map<String, Order> sortKeys = new HashMap<>(1);
     sortKeys.put("id", Order.ASCENDING);
@@ -99,20 +111,21 @@ public class UserMoneyIncreaseJobConfiguration {
 
   @Bean
   @StepScope
-  public ItemProcessor<User, User> increaseUserMoneyProcessor(
+  public ItemProcessor<User, User> userIncreaseMoneyProcessor(
       @Value("#{jobParameters[money]}") Integer money) {
-    log.info(">>>>> increaseUserMoneyProcessor working");
-    return user -> {
-      User rich_user = new User(user.getId(), user.getName(), user.getMoney(), user.getDeleteRes(),
-          user.getDeleteRes());
-      rich_user.updateMoney(rich_user.getMoney() + money);
-      return rich_user;
+    log.info(">>>>> userIncreaseMoneyProcessor working");
+    return (user) -> {
+      if (ObjectUtils.isEmpty(user.getDeleteDate())) {
+        user.updateMoney(user.getMoney() + money);
+        return user;
+      }
+      return null;
     };
   }
 
   @Bean
-  public JpaItemWriter<User> userInfoWriter() {
-    log.info(">>>>> userInfoWriter working");
+  public JpaItemWriter<User> userIncreaseMoneyWriter() {
+    log.info(">>>>> userIncreaseMoneyWriter working");
     JpaItemWriter<User> jpaItemWriter = new JpaItemWriter<>();
     jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
 

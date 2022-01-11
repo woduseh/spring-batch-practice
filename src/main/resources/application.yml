@@ -6,13 +6,20 @@ spring:
     job:
       enabled: false
       names: ${job.name:NONE}
-        
+
   jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        show-sql: true
+        format_sql: true
 
 ---
 spring:
+  h2:
+    console:
+      enabled: true
   datasource:
     hikari:
       jdbc-url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE

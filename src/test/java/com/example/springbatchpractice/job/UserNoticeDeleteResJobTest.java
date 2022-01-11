@@ -65,10 +65,10 @@ public class UserNoticeDeleteResJobTest {
     long money = 1000000;
     LocalDate deleteRes = LocalDate.of(2022, 1, 13);
 
-    userRepository.save(new User("황재연", money, deleteRes, null));
+    userRepository.save(new User("황재연", money, deleteRes));
 
     JobParameters jobParameters = new JobParametersBuilder()
-        .addDate("deleteRes", java.sql.Date.valueOf(LocalDate.of(2022, 1, 13)))
+        .addLong("dueDate", 7L)
         .addString("unique Parameter", LocalDateTime.now().toString())
         .toJobParameters();
 

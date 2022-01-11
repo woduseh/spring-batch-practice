@@ -61,7 +61,9 @@ public class UserDeleteJobTest {
     long money = 1000000;
     LocalDate deleteRes = LocalDate.now();
 
-    userRepository.save(new User("황재연", money, deleteRes, null));
+    userRepository.save(new User("황재연1", money, deleteRes));
+    userRepository.save(new User("황재연2", money, LocalDate.of(2022, 1, 9)));
+    userRepository.save(new User("황재연3", money, LocalDate.of(2022, 1, 13)));
 
     JobParameters jobParameters = new JobParametersBuilder()
         .addString("unique Parameter", LocalDateTime.now().toString())
@@ -73,7 +75,9 @@ public class UserDeleteJobTest {
     // Then
     assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
     List<User> userList = userRepository.findAll();
-    assertThat(userList.size()).isEqualTo(1);
+    assertThat(userList.size()).isEqualTo(3);
     assertThat(userList.get(0).getDeleteDate()).isEqualTo(deleteRes);
+    assertThat(userList.get(1).getDeleteDate()).isNull();
+    assertThat(userList.get(2).getDeleteDate()).isNull();
   }
 }

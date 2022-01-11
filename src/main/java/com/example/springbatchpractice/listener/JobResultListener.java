@@ -15,6 +15,8 @@ public class JobResultListener implements JobExecutionListener {
   @Override
   public void beforeJob(JobExecution jobExecution) {
     log.info("New Job Started.");
+    log.info("Start jobName: {} ,param:[{}]", jobExecution.getJobInstance().getJobName(),
+        jobExecution.getJobParameters().toProperties());
   }
 
   @Override
@@ -24,5 +26,7 @@ public class JobResultListener implements JobExecutionListener {
     } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
       log.info("Job Failure.");
     }
+    log.info("End jobName: {} ,param:[{}]", jobExecution.getJobInstance().getJobName(),
+        jobExecution.getJobParameters().toProperties());
   }
 }

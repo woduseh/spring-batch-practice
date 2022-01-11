@@ -7,13 +7,15 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
+// https://jojoldu.tistory.com/490?category=902551 참고
+
 /**
  * <pre>
  * packageName      : com.example.springbatchpractice.util
  * fileName         : CreateDateJobParameter
  * author           : JYHwang
  * date             : 2022-01-10
- * description      :
+ * description      : job parameter로 localdate를 사용하기 위한 유틸리티
  * </pre>
  * ===========================================================
  * <pre>

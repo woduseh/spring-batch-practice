@@ -32,14 +32,14 @@ public class User {
   @Column(name = "money")
   private Long money;
 
-  @Column(name = "delete_date")
-  private LocalDate deleteDate;
-
   @Column(name = "delete_res")
   private LocalDate deleteRes;
 
+  @Column(name = "delete_date")
+  private LocalDate deleteDate;
+
   @Builder
-  public User(Long Id, String Name, Long Money, LocalDate deleteDate, LocalDate deleteRes) {
+  public User(Long Id, String Name, Long Money, LocalDate deleteRes, LocalDate deleteDate) {
     this.id = Id;
     this.name = Name;
     this.money = Money;
@@ -48,11 +48,10 @@ public class User {
   }
 
   @Builder
-  public User(String Name, Long Money, LocalDate deleteRes, LocalDate deleteDate) {
+  public User(String Name, Long Money, LocalDate deleteRes) {
     this.name = Name;
     this.money = Money;
     this.deleteRes = deleteRes;
-    this.deleteDate = deleteDate;
   }
 
   public void updateMoney(Long Money) {

@@ -25,9 +25,11 @@ import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.util.ObjectUtils;
 
 /**
  * <pre>
@@ -35,13 +37,14 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  * fileName         : UserNoticeDeleteResJobConfiguration
  * author           : JYHwang
  * date             : 2022-01-10
- * description      : 삭제 예졍일이
+ * description      : 입력한 삭제 예정일 (deleteRes)보다 삭제 예정일이 적게 남은 User들에게 삭제 예정 알림을 보내는 배치 작업
  * </pre>
  * ===========================================================
  * <pre>
  * DATE                 AUTHOR                  NOTE
  * -----------------------------------------------------
  * 2022-01-10           JYHwang                 최초 생성
+ * 2022-01-11           JYHwang                 불필요한 코드 개선
  * </pre>
  */
 
@@ -54,7 +57,6 @@ public class UserNoticeDeleteResJobConfiguration {
   private final StepBuilderFactory stepBuilderFactory;
   private final EntityManagerFactory entityManagerFactory;
   private final DataSource dataSource;
-  private final CreateDateJobParameter jobParameter;
 
   private static final int CHUNK_SIZE = 1000;
 
@@ -80,42 +82,39 @@ public class UserNoticeDeleteResJobConfiguration {
     log.info(">>>>> userNoticeDeleteResStep");
     return stepBuilderFactory.get("userNoticeDeleteResStep")
         .<User, User>chunk(CHUNK_SIZE)
-        .reader(userInfoReader())
+        .reader(userNoticeDeleteResReader(null))
         .processor(userNoticeDeleteResProcessor())
-        .writer(userInfoWriter())
+        .writer(userNoticeDeleteResWriter())
         .build();
   }
 
   @Bean
   @StepScope
-  public JdbcPagingItemReader<User> userInfoReader() throws Exception {
-    log.info(">>>>> userInfoReader working");
+  public JdbcPagingItemReader<User> userNoticeDeleteResReader(
+      @Value("#{jobParameters[dueDate]}") Integer dueDate) throws Exception {
+    log.info(">>>>> userNoticeDeleteResReader working");
 
     Map<String, Object> parameterValues = new HashMap<>();
-    parameterValues.put("deleteRes", jobParameter.getDeleteRes());
-
-    Period period = Period.between(LocalDate.now(), jobParameter.getDeleteRes());
-    parameterValues.put("diffBetweenDays", period.getDays());
+    parameterValues.put("dueDate", dueDate);
 
     return new JdbcPagingItemReaderBuilder<User>()
         .pageSize(CHUNK_SIZE)
         .fetchSize(CHUNK_SIZE)
         .dataSource(dataSource)
         .rowMapper(new BeanPropertyRowMapper<>(User.class))
-        .queryProvider(createQueryProvider())
+        .queryProvider(selectUserNoticeDeleteResQueryProvider())
         .parameterValues(parameterValues)
-        .name("userInfoReader")
+        .name("userNoticeDeleteResReader")
         .build();
   }
 
   @Bean
-  public PagingQueryProvider createQueryProvider() throws Exception {
+  public PagingQueryProvider selectUserNoticeDeleteResQueryProvider() throws Exception {
     SqlPagingQueryProviderFactoryBean queryProvider = new SqlPagingQueryProviderFactoryBean();
     queryProvider.setDataSource(dataSource); // Database에 맞는 PagingQueryProvider를 선택하기 위해
     queryProvider.setSelectClause("*");
     queryProvider.setFromClause("from user");
-    queryProvider.setWhereClause(
-        "where delete_date is null and DATEDIFF(:deleteRes, now()) <= :diffBetweenDays");
+    queryProvider.setWhereClause("where DATEDIFF(delete_res, now()) <= :dueDate");
 
     Map<String, Order> sortKeys = new HashMap<>(1);
     sortKeys.put("id", Order.ASCENDING);
@@ -130,16 +129,18 @@ public class UserNoticeDeleteResJobConfiguration {
   public ItemProcessor<User, User> userNoticeDeleteResProcessor() {
     log.info(">>>>> userNoticeDeleteResProcessor working");
     return user -> {
-      Period period = Period.between(LocalDate.now(), user.getDeleteRes());
-      log.info("{} 님. 앞으로 {}일 간 접속하지 않으면 계정이 삭제됩니다.", user.getName(), period.getDays());
+      if (ObjectUtils.isEmpty(user.getDeleteDate())) {
+        Period period = Period.between(LocalDate.now(), user.getDeleteRes());
+        log.info("{} 님. 앞으로 {}일 간 접속하지 않으면 계정이 삭제됩니다.", user.getName(), period.getDays());
+      }
       return null;
     };
   }
 
 
   @Bean
-  public JpaItemWriter<User> userInfoWriter() {
-    log.info(">>>>> userInfoWriter working");
+  public JpaItemWriter<User> userNoticeDeleteResWriter() {
+    log.info(">>>>> userNoticeDeleteResWriter working");
     JpaItemWriter<User> jpaItemWriter = new JpaItemWriter<>();
     jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
 
