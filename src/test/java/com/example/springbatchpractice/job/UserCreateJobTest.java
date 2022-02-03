@@ -40,7 +40,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @SpringBatchTest
 @SpringBootTest(classes = {TestBatchConfig.class, UserCreateJobConfiguration.class})
-public class UserCreateJobTest {
+class UserCreateJobTest {
 
   @Autowired
   private UserRepository userRepository;
@@ -55,7 +55,7 @@ public class UserCreateJobTest {
 
   @Test
   @DisplayName("User Create Test")
-  public void createTest() throws Exception {
+  void createTest() throws Exception {
     // given
     Long userSize = 1L;
     Long baseMoney = 1000000L;

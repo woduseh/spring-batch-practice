@@ -39,23 +39,23 @@ public class User {
   private LocalDate deleteDate;
 
   @Builder
-  public User(Long Id, String Name, Long Money, LocalDate deleteRes, LocalDate deleteDate) {
-    this.id = Id;
-    this.name = Name;
-    this.money = Money;
+  public User(Long id, String name, Long money, LocalDate deleteRes, LocalDate deleteDate) {
+    this.id = id;
+    this.name = name;
+    this.money = money;
     this.deleteRes = deleteRes;
     this.deleteDate = deleteDate;
   }
 
   @Builder
-  public User(String Name, Long Money, LocalDate deleteRes) {
-    this.name = Name;
-    this.money = Money;
+  public User(String name, Long money, LocalDate deleteRes) {
+    this.name = name;
+    this.money = money;
     this.deleteRes = deleteRes;
   }
 
-  public void updateMoney(Long Money) {
-    this.money = Money;
+  public void updateMoney(Long money) {
+    this.money = money;
   }
 
   public void deleteUser() {

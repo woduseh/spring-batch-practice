@@ -40,7 +40,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @SpringBatchTest
 @SpringBootTest(classes = {TestBatchConfig.class, UserNoticeDeleteResJobConfiguration.class})
-public class UserNoticeDeleteResJobTest {
+class UserNoticeDeleteResJobTest {
 
   @Autowired
   private UserRepository userRepository;
@@ -55,12 +55,10 @@ public class UserNoticeDeleteResJobTest {
 
   /**
    * application.yml의 profile.active 옵션이 local이면 실패함 (sql 문법이 mysql에 맞추어진 까닭에 옵션을 mysql로 변경하면 성공)
-   *
-   * @throws Exception
    */
   @Test
   @DisplayName("Notice Delete_Res")
-  public void UserNoticeDeleteResTest() throws Exception {
+  void UserNoticeDeleteResTest() throws Exception {
     // given
     long money = 1000000;
     LocalDate deleteRes = LocalDate.of(2022, 1, 13);

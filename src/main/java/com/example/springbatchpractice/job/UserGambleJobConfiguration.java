@@ -82,11 +82,11 @@ public class UserGambleJobConfiguration {
   @Bean
   @StepScope
   public JdbcPagingItemReader<User> userGambleInfoReader(
-      @Value("#{jobParameters[base_amount]}") Long base_amount) throws Exception {
+      @Value("#{jobParameters[base_amount]}") Long baseAmount) throws Exception {
     log.info(">>>>> userGambleInfoReader working");
 
     Map<String, Object> parameterValues = new HashMap<>();
-    parameterValues.put("base_amount", base_amount);
+    parameterValues.put("base_amount", baseAmount);
 
     return new JdbcPagingItemReaderBuilder<User>()
         .pageSize(CHUNK_SIZE)

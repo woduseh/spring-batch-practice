@@ -67,7 +67,7 @@ public class UserNoticeDeleteResJobConfiguration {
   }
 
   @Bean
-  Job UserNoticeDeleteResJob() throws Exception {
+  Job userNoticeDeleteResJob() throws Exception {
     return jobBuilderFactory.get("userNoticeDeleteResJob")
         .start(userNoticeDeleteResStep())
         .incrementer(new RunIdIncrementer())

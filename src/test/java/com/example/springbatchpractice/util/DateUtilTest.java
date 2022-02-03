@@ -10,13 +10,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-public class DateUtilTest {
+class DateUtilTest {
 
   @Test
   @DisplayName("랜덤 일자 생성")
-  public void randomTimeMaker() {
+  void randomTimeMaker() {
     long minDay = LocalDate.now().toEpochDay();
-    long maxDay = LocalDate.of(2022, 1, 31).toEpochDay();
+    long maxDay = LocalDate.of(2022, 12, 31).toEpochDay();
     long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
     LocalDate randomDate = LocalDate.ofEpochDay(randomDay);
 

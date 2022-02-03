@@ -58,7 +58,7 @@ public class UserIncreaseMoneyJobConfiguration {
   private static final int CHUNK_SIZE = 1000;
 
   @Bean
-  Job UserIncreaseMoneyJob() throws Exception {
+  Job userIncreaseMoneyJob() throws Exception {
     return jobBuilderFactory.get("userIncreaseMoneyJob")
         .start(userIncreaseMoneyStep())
         .incrementer(new RunIdIncrementer())
@@ -114,7 +114,7 @@ public class UserIncreaseMoneyJobConfiguration {
   public ItemProcessor<User, User> userIncreaseMoneyProcessor(
       @Value("#{jobParameters[money]}") Integer money) {
     log.info(">>>>> userIncreaseMoneyProcessor working");
-    return (user) -> {
+    return user -> {
       if (ObjectUtils.isEmpty(user.getDeleteDate())) {
         user.updateMoney(user.getMoney() + money);
         return user;

@@ -42,6 +42,7 @@ public class UserCreateJobConfiguration {
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;
   private final UserRepository userRepository;
+  private final Random random = new Random();
 
   @Bean
   public Job userCreateJob() {
@@ -53,16 +54,16 @@ public class UserCreateJobConfiguration {
 
   @Bean
   @JobScope
-  public Step userCreateStep(@Value("#{jobParameters[user_size]}") Long user_size,
-      @Value("#{jobParameters[base_money]}") Long base_money) {
+  public Step userCreateStep(@Value("#{jobParameters[user_size]}") Long userSize,
+      @Value("#{jobParameters[base_money]}") Long baseMoney) {
     return stepBuilderFactory.get("userCreateStep")
         .tasklet((contribution, chunkContext) -> {
           log.info(">>>>> userCreateStep");
 
-          for (Long i = 1L; i <= user_size; i++) {
-            String name = nameMaker(new Random().nextInt(7));
+          for (Long i = 1L; i <= userSize; i++) {
+            String name = nameMaker(random.nextInt(7));
             LocalDate deleteRes = DateUtil.randomTimeMaker();
-            User user = new User(name, base_money, deleteRes);
+            User user = new User(name, baseMoney, deleteRes);
             log.info(">>>>> {}st user is {}", i, user.getName());
             userRepository.save(user);
           }

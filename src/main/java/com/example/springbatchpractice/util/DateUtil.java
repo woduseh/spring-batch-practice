@@ -5,9 +5,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class DateUtil {
 
+  private DateUtil() {
+
+  }
+
   public static LocalDate randomTimeMaker() {
     long minDay = LocalDate.now().toEpochDay();
-    long maxDay = LocalDate.of(2022, 1, 31).toEpochDay();
+    long maxDay = LocalDate.of(2022, 12, 31).toEpochDay();
     long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
 
     return LocalDate.ofEpochDay(randomDay);

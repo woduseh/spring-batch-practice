@@ -42,7 +42,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @SpringBatchTest
 @SpringBootTest(classes = {TestBatchConfig.class, UserIncreaseMoneyJobConfiguration.class})
-public class UserMoneyIncreaseJobTest {
+class UserMoneyIncreaseJobTest {
 
   @Autowired
   private UserRepository userRepository;
@@ -57,7 +57,7 @@ public class UserMoneyIncreaseJobTest {
 
   @Test
   @DisplayName("Money Increase")
-  public void moneyIncreaseTest() throws Exception {
+  void moneyIncreaseTest() throws Exception {
     // Given
     long money = 1000000;
     long base_amount = 500000;

@@ -41,7 +41,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @SpringBatchTest
 @SpringBootTest(classes = {TestBatchConfig.class, UserDeleteJobConfiguration.class})
-public class UserDeleteJobTest {
+class UserDeleteJobTest {
 
   @Autowired
   private UserRepository userRepository;
@@ -56,7 +56,7 @@ public class UserDeleteJobTest {
 
   @Test
   @DisplayName("Delete_Date Update Test")
-  public void deleteTest() throws Exception {
+  void deleteTest() throws Exception {
     // given
     long money = 1000000;
     LocalDate deleteRes = LocalDate.now();
