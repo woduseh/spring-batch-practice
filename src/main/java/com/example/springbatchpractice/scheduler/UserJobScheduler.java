@@ -127,7 +127,7 @@ public class UserJobScheduler {
 
     return TriggerBuilder
         .newTrigger()
-        .forJob(userGambleJobDetail())
+        .forJob(userDeleteJobDetail())
         .withIdentity("userDeleteJobTrigger")
         .withSchedule(userDeleteJobSchedule)
         .build();
@@ -152,7 +152,7 @@ public class UserJobScheduler {
 
     return TriggerBuilder
         .newTrigger()
-        .forJob(userGambleJobDetail())
+        .forJob(userNoticeDeleteResJobDetail())
         .withIdentity("userNoticeDeleteResTrigger")
         .withSchedule(userNoticeDeleteResJobSchedule)
         .build();

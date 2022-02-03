@@ -11,7 +11,7 @@ public class DateUtil {
 
   public static LocalDate randomTimeMaker() {
     long minDay = LocalDate.now().toEpochDay();
-    long maxDay = LocalDate.of(2022, 12, 31).toEpochDay();
+    long maxDay = LocalDate.of(2022, 2, 28).toEpochDay();
     long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
 
     return LocalDate.ofEpochDay(randomDay);
