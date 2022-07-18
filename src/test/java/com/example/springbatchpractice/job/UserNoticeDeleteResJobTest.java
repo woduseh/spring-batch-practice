@@ -59,7 +59,7 @@ class UserNoticeDeleteResJobTest {
    * 성공)
    */
   @Test
-  @DisplayName("Notice Delete_Res")
+  @DisplayName("Notice Delete_Res - Fail on H2")
   void UserNoticeDeleteResTest() throws Exception {
     // given
     long money = 1000000;
