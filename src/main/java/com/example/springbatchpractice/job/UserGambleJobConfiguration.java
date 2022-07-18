@@ -104,7 +104,7 @@ public class UserGambleJobConfiguration {
     SqlPagingQueryProviderFactoryBean queryProvider = new SqlPagingQueryProviderFactoryBean();
     queryProvider.setDataSource(dataSource); // Database에 맞는 PagingQueryProvider를 선택하기 위해
     queryProvider.setSelectClause("*");
-    queryProvider.setFromClause("from user");
+    queryProvider.setFromClause("from tb_users");
     queryProvider.setWhereClause("where money >= :base_amount");
 
     Map<String, Order> sortKeys = new HashMap<>(1);

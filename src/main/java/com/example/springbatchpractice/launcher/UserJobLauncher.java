@@ -41,25 +41,25 @@ public class UserJobLauncher extends QuartzJobBean {
   protected JobParameters getJobParametersFromJobMap(Map<String, Object> jobDataMap) {
 
     // Job Parameter 중복으로 인한 실행 에러를 막기 위해 Unique Parameter를 삽입
-    jobDataMap.put("JobID", String.valueOf(System.currentTimeMillis()));
+    jobDataMap.put("JobId", String.valueOf(System.currentTimeMillis()));
 
     JobParametersBuilder builder = new JobParametersBuilder();
 
     for (Entry<String, Object> entry : jobDataMap.entrySet()) {
       String key = entry.getKey();
       Object value = entry.getValue();
-      if (value instanceof String && !key.equals("jobName")) {
-        builder.addString(key, (String) value);
+      if (value instanceof String string && !key.equals("jobName")) {
+        builder.addString(key, string);
       } else if (value instanceof Float || value instanceof Double) {
         builder.addDouble(key, ((Number) value).doubleValue());
       } else if (value instanceof Integer || value instanceof Long) {
         builder.addLong(key, ((Number) value).longValue());
-      } else if (value instanceof Date) {
-        builder.addDate(key, (Date) value);
+      } else if (value instanceof Date date) {
+        builder.addDate(key, date);
       } else {
         log.debug(
-            "JobDataMap contains values which are not job parameters (ignoring). [key:{}, value:{}]",
-            key, value);
+                "JobDataMap contains values which are not job parameters (ignoring). [key:{}, value:{}]",
+                key, value);
       }
     }
 

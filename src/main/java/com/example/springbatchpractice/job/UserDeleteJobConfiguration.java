@@ -59,6 +59,7 @@ public class UserDeleteJobConfiguration {
 
           for (User user : userList) {
             user.deleteUser();
+              log.info("성공적으로 유저를 삭제했습니다. 회원 번호: {} ", user.getId());
           }
 
           return RepeatStatus.FINISHED;

@@ -113,8 +113,9 @@ public class UserNoticeDeleteResJobConfiguration {
     SqlPagingQueryProviderFactoryBean queryProvider = new SqlPagingQueryProviderFactoryBean();
     queryProvider.setDataSource(dataSource); // Database에 맞는 PagingQueryProvider를 선택하기 위해
     queryProvider.setSelectClause("*");
-    queryProvider.setFromClause("from user");
-    queryProvider.setWhereClause("where DATEDIFF(delete_res, now()) <= :dueDate");
+    queryProvider.setFromClause("from tb_users");
+    queryProvider.setWhereClause(
+            "where DATEDIFF(delete_res, now()) <= :dueDate and DATEDIFF(now(), delete_res) < 0");
 
     Map<String, Order> sortKeys = new HashMap<>(1);
     sortKeys.put("id", Order.ASCENDING);
@@ -131,7 +132,11 @@ public class UserNoticeDeleteResJobConfiguration {
     return user -> {
       if (ObjectUtils.isEmpty(user.getDeleteDate())) {
         Period period = Period.between(LocalDate.now(), user.getDeleteRes());
-        log.info("{} 님. 앞으로 {}일 간 접속하지 않으면 계정이 삭제됩니다.", user.getName(), period.getDays());
+        if (period.getDays() == 0) {
+          log.info("{} 님. 금일 계정이 삭제될 예정입니다. 이를 원치 않으시다면 접속 해주세요.", user.getName());
+        } else {
+          log.info("{} 님. 앞으로 {}일 간 접속하지 않으면 계정이 삭제됩니다.", user.getName(), period.getDays());
+        }
       }
       return null;
     };

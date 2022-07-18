@@ -1,7 +1,8 @@
 package com.example.springbatchpractice.util;
 
 import java.time.LocalDate;
-import java.util.concurrent.ThreadLocalRandom;
+import java.time.temporal.ChronoUnit;
+import java.util.random.RandomGenerator;
 
 public class DateUtil {
 
@@ -10,9 +11,10 @@ public class DateUtil {
   }
 
   public static LocalDate randomTimeMaker() {
-    long minDay = LocalDate.now().toEpochDay();
-    long maxDay = LocalDate.of(2022, 2, 28).toEpochDay();
-    long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
+    LocalDate now = LocalDate.now();
+    long minDay = now.toEpochDay();
+    long maxDay = now.plus(1, ChronoUnit.MONTHS).toEpochDay();
+    long randomDay = RandomGenerator.getDefault().nextLong(minDay, maxDay);
 
     return LocalDate.ofEpochDay(randomDay);
   }

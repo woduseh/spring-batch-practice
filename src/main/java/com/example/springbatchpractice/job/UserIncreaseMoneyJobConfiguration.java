@@ -99,7 +99,7 @@ public class UserIncreaseMoneyJobConfiguration {
     SqlPagingQueryProviderFactoryBean queryProvider = new SqlPagingQueryProviderFactoryBean();
     queryProvider.setDataSource(dataSource); // Database에 맞는 PagingQueryProvider를 선택하기 위해
     queryProvider.setSelectClause("*");
-    queryProvider.setFromClause("from user");
+    queryProvider.setFromClause("from tb_users");
 
     Map<String, Order> sortKeys = new HashMap<>(1);
     sortKeys.put("id", Order.ASCENDING);

@@ -3,6 +3,7 @@ package com.example.springbatchpractice.util;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ThreadLocalRandom;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,9 @@ class DateUtilTest {
   @Test
   @DisplayName("랜덤 일자 생성")
   void randomTimeMaker() {
-    long minDay = LocalDate.now().toEpochDay();
-    long maxDay = LocalDate.of(2022, 12, 31).toEpochDay();
+    LocalDate now = LocalDate.now();
+    long minDay = now.toEpochDay();
+    long maxDay = now.plus(1, ChronoUnit.MONTHS).toEpochDay();
     long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
     LocalDate randomDate = LocalDate.ofEpochDay(randomDay);
 

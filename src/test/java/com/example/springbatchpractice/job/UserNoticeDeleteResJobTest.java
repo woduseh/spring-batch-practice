@@ -7,6 +7,7 @@ import com.example.springbatchpractice.dao.UserRepository;
 import com.example.springbatchpractice.entity.User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,26 +55,32 @@ class UserNoticeDeleteResJobTest {
   }
 
   /**
-   * application.yml의 profile.active 옵션이 local이면 실패함 (sql 문법이 mysql에 맞추어진 까닭에 옵션을 mysql로 변경하면 성공)
+   * application.yml의 profile.active 옵션이 local이면 실패함 (DATEDIFF 함수가 mysql에 맞추어진 까닭에 옵션을 mysql로 변경하면
+   * 성공)
    */
   @Test
   @DisplayName("Notice Delete_Res")
   void UserNoticeDeleteResTest() throws Exception {
     // given
     long money = 1000000;
-    LocalDate deleteRes = LocalDate.of(2022, 1, 13);
+    LocalDate deleteRes = LocalDateTime.now()
+            .plusDays(3)
+            .toLocalDate();
 
     userRepository.save(new User("황재연", money, deleteRes));
 
     JobParameters jobParameters = new JobParametersBuilder()
-        .addLong("dueDate", 7L)
-        .addString("unique Parameter", LocalDateTime.now().toString())
-        .toJobParameters();
+            .addLong("dueDate", 7L)
+            .addString("unique Parameter", LocalDateTime.now().toString())
+            .toJobParameters();
 
     // when
     JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
     // then
     assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
+    List<User> userList = userRepository.findAll();
+    assertThat(userList.size()).isEqualTo(1);
+    assertThat(userList.get(0).getDeleteDate()).isNotNull();
   }
 }
